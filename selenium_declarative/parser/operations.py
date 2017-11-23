@@ -29,3 +29,10 @@ def op_send_keys(ctx, val):
 
 def op_wait(ctx, sec):
     time.sleep(sec)
+
+def op_switch_frame(ctx, idx = -1):
+    count_frame = len(ctx.driver.find_elements("tag name", "iframe"))
+    if idx < 0:
+        idx = count_frame + idx
+    idx = idx % count_frame
+    ctx.driver.switch_to.frame(idx)

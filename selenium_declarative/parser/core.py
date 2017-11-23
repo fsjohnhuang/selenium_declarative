@@ -2,7 +2,13 @@
 # -*- coding: utf-8 -*-
 import special_forms, expressions, operations
 
-def resolve(symbol):
+class Context:
+    def __init__(self, driver):
+        self.driver = driver
+        self.expr_rets = []
+        self.parse = None
+
+def _resolve(symbol):
     if symbol.startswith("__"):
         raise SyntaxError("Forbid symbol starts with __.")
 
@@ -25,7 +31,7 @@ def parser(ctx):
             symbol = expr[0]
             args = expr[1:]
             args = [ctx] + args
-            f = resolve(symbol)
+            f = _resolve(symbol)
             if f:
                 f(*args)
             else:
