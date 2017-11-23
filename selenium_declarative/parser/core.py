@@ -10,6 +10,7 @@ class Context:
         self.collect_expects = {}
         self.expects = {}
         self.parse = None
+        self.slot = {}
 
 def _resolve(symbol):
     if symbol.startswith("__"):
