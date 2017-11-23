@@ -84,7 +84,7 @@ def op_inject_ui_tips(ctx):
     ctx.driver.execute_script("""
     var s_dialog = document.createElement('div');
     s_dialog.id = arguments[0];
-    s_dialog.style.cssText = 'display:none;width:500px;box-shadow:1px 1px 10px 1px #bbb;border-radius:20px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);overflow:hidden;';
+    s_dialog.style.cssText = 'display:none;width:500px;box-shadow:1px 1px 20px 5px #bbb;border-radius:20px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);overflow:hidden;';
 
     var s_title = document.createElement('div');
     s_title.id = arguments[1];
