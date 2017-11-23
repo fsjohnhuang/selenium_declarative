@@ -57,10 +57,10 @@ def _collect_expect(ctx, id, expect):
 
 def op_assert(ctx, id, operator, actual, expect = None):
     assert_ret = None
-    if not expect is None:
-        if id in ctx.expects:
-            expect = ctx.expects.get(id)
+    if expect is None and id in ctx.expects:
+        expect = ctx.expects.get(id)
 
+    if not expect is None:
         actual = actual(ctx)
         assert_ret = _do_assert(operator, actual, expect)
         if assert_ret:

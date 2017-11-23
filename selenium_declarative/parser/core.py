@@ -28,7 +28,11 @@ def _resolve(symbol):
         
     return f
 
-def parser(ctx):
+def parser(driver, expects = None):
+    ctx = Context(driver)
+    if isinstance(expects, dict):
+        ctx.expects = expects
+
     def parse(exprs):
         for expr in exprs:
             symbol = expr[0]
@@ -40,4 +44,8 @@ def parser(ctx):
             else:
                 raise SyntaxError("No such symbol {0}".format(symbol))
 
-    return parse
+        return {"collect_expects": ctx.collect_expects, "assert_rets": ctx.assert_rets}
+
+    ctx.parse = parse
+    return ctx.parse
+
