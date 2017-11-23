@@ -7,7 +7,6 @@ class Context:
         self.driver = driver
         self.expr_rets = []
         self.assert_rets = []
-        self.collect_expects = {}
         self.expects = {}
         self.parse = None
         self.slot = {}
@@ -29,8 +28,9 @@ def _resolve(symbol):
         
     return f
 
-def parser(driver, expects = None):
+def parser(driver, expects = None, expr_rets = []):
     ctx = Context(driver)
+    ctx.expr_rets = expr_rets[0:]
     if isinstance(expects, dict):
         ctx.expects = expects
 
@@ -45,7 +45,7 @@ def parser(driver, expects = None):
             else:
                 raise SyntaxError("No such symbol {0}".format(symbol))
 
-        return {"collect_expects": ctx.collect_expects, "assert_rets": ctx.assert_rets}
+        return ctx
 
     ctx.parse = parse
     return ctx.parse
