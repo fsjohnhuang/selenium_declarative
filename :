@@ -7,7 +7,6 @@ class Context:
         self.driver = driver
         self.expr_rets = []
         self.assert_rets = []
-        self.collect_expects = {}
         self.expects = {}
         self.parse = None
 
