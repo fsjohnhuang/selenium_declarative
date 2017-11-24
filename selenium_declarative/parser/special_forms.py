@@ -26,7 +26,8 @@ def sf_when(ctx, cond, *exprs):
         cond_ret = False
 
     if cond_ret:
-        ctx.parse(exprs)
+        parse = core.parser(ctx.driver, ctx.expects, ctx.expr_rets)
+        parse(exprs)
 
 def sf_not(ctx, expr):
     expr_ret = expr
