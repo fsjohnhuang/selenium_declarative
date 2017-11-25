@@ -1,52 +1,100 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import special_forms, expressions, operations
+from inspect import getargspec, isfunction
+import special_forms, expressions
+
+def reflect_builtins(module):
+    members = dir(module)
+    pub_members = filter(lambda m: not m.startswith("_"), members)
+    fns = {}
+    for pub_member in pub_members:
+        fns["_".join(pub_member.split("_")[1:])] = getattr(module, pub_member)
+    return fns
 
 class Context:
-    def __init__(self, driver):
+    def __init__(self, context=None):
+        self.context = context
+        self.__stack = []      # local variables, append only
+
+    def peek(self, index=0):
+        """0 means the top item of stack
+        """
+        length_stack = len(self.__stack)
+        idx = index - length_stack
+        if 0 <= idx:
+            # raise an error when index is greater than the length of the whole stack
+            return self.context.peek(idx)
+        else:
+            return self.__stack[-index-1]
+
+    def push(self, value):
+        self.__stack.append(value)
+
+class Parser:
+    def __init__(self, driver, fns=None):
         self.driver = driver
-        self.expr_rets = []
-        self.assert_rets = []
-        self.expects = {}
-        self.parse = None
-        self.slot = {}
+        self.sfs = reflect_builtins(special_forms)         # special forms
+        self.fns = reflect_builtins(expressions)           # global functions
+        if isinstance(fns, dict):
+            for kv in fns.items():
+                self.fns.setdefault(kv[0], kv[1])
+        self.globals = {}                                  # global variables
+        self.context = Context()
 
-def _resolve(symbol):
-    if symbol.startswith("__"):
-        raise SyntaxError("Forbid symbol starts with __.")
+    def __resolve(self, symbol):
+        if symbol.startswith("__"):
+            raise SyntaxError("Forbid symbol starts with __.")
 
-    f = None
-    is_sf = hasattr(special_forms, "sf_" + symbol)
-    is_expr = hasattr(expressions, "expr_" + symbol)
-    is_op = hasattr(operations, "op_" + symbol)
-    if is_sf:
-        f = getattr(special_forms, "sf_" + symbol)
-    elif is_expr:
-        f = getattr(expressions, "expr_" + symbol)
-    elif is_op:
-        f = getattr(operations, "op_" + symbol)
-        
-    return f
+        ret = self.sfs.get(symbol)
+        if ret is None:
+            ret = self.fns.get(symbol)
 
-def parser(driver, expects = None, expr_rets = []):
-    ctx = Context(driver)
-    ctx.expr_rets = expr_rets[0:]
-    if isinstance(expects, dict):
-        ctx.expects = expects
+        return ret
 
-    def parse(exprs):
+    def __invoke(self, func, args):
+        signature = getargspec(func)[0]
+        builtins = []
+        for arg in signature:
+            if "__parser__" == arg:
+                builtins.append(self)
+            elif "__driver__" == arg:
+                builtins.append(self.driver)
+            elif "__globals__" == arg:
+                builtins.append(self.globals)
+            elif "__peek__" == arg:
+                builtins.append(lambda index=0: self.context.peek(index))
+
+        ret = apply(func, builtins + args)
+        return ret
+
+    def parse_with_sub_context(self, exprs):
+        self.context = Context(self.context)
+        self.parse(exprs)
+        ret = self.context.peek()
+        # recover
+        self.context = self.context.context
+
+        return ret
+
+    def parse(self, exprs):
+        # exprs should be 2 dimensions array as least.
+        if not isinstance(exprs[0], list):
+            exprs = [exprs]
+
         for expr in exprs:
             symbol = expr[0]
             args = expr[1:]
-            args = [ctx] + args
-            f = _resolve(symbol)
-            if f:
-                f(*args)
+
+            ret = None
+            if isfunction(symbol):
+                ret = self.__invoke(symbol, args)
             else:
-                raise SyntaxError("No such symbol {0}".format(symbol))
+                fn = self.__resolve(symbol)
+                if fn:
+                    ret = self.__invoke(fn, args)
+                else:
+                    raise SyntaxError("Can't resolve symbol {0}.".format(symbol))
 
-        return ctx
-
-    ctx.parse = parse
-    return ctx.parse
-
+            # if fn is an expression, stores the return value of it into stack
+            if not ret is None:
+                self.context.push(ret)
