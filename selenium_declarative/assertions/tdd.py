@@ -38,8 +38,6 @@ class TDD:
         elif "not_ok" == action:
             action = "equal"
             expect = False
-        elif "not_equal" == action:
-            action = "not_equal"
 
         ret = self.__take_action(action, actual, expect)
         return [ret, expect]
