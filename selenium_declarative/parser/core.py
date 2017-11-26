@@ -27,6 +27,11 @@ class Context:
         else:
             return self.__stack[-index-1]
 
+    def peek_locals(self, index=0):
+        length_stack = len(self.__stack)
+        idx = length_stack + (-index-1)
+        return self.__stack[idx] if 0 <= idx < length_stack else None
+
     def push(self, value):
         self.__stack.append(value)
 
@@ -68,9 +73,12 @@ class Parser:
         return ret
 
     def parse_with_sub_context(self, exprs):
+        if exprs is None:
+            return None
+
         self.context = Context(self.context)
         self.parse(exprs)
-        ret = self.context.peek()
+        ret = self.context.peek_locals()
         # recover
         self.context = self.context.context
 

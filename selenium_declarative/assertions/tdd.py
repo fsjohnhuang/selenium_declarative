@@ -3,36 +3,50 @@
 from inspect import isfunction
 from test_runner.expect import NoExpectException
 
-def do_assertion(action, actual, expect, message = ""):
-    # 0 - Success, 1 - Failure, -1 - Error
-    ret = {"result": 1, "detail": None, "message": message, "actual": actual, "expect": expect}
-    try:
-        ret["result"] = 0 if _do_assertion(action, actual, expect) else 1
-    except Exception, e:
-        ret["result"] = -1
-        ret["detail"] = e
-    return ret
+class TDD:
+    __actions = {"equal": lambda a,e: a == e,
+                 "not_equal": lambda a,e: not a == e}
 
-def _do_assertion(action, actual, expect):
-    ret = False
-    if isfunction(actual):
-        actual = actual()
-        
-    if "ok" == action:
-        ret = _take_action("equal", actual, True)
-    elif "not_ok" == action:
-        ret = _take_action("equal", actual, False)
-    elif "equal" == action:
-        ret = _take_action("equal", actual, expect)
-    elif "not_equal" == action:
-        ret = _take_action("not_equal", actual, expect)
-    return ret
+    def __init__(self):
+        self.__results = []
 
-_actions = {"equal": lambda a,e: a == e,
-            "not_equal": lambda a,e: not a == e}
-def _take_action(action, actual, expect):
-    if expect is None:
-        raise NoExpectException()
+    @property
+    def results(self):
+        return self.__results
 
-    action = _actions[action]
-    return action(actual, expect)
+    def execute(self, action, actual, expect, message = ""):
+        ret = {"result": 1, "detail": None, "message": message, "actual": actual, "expect": expect, "action": action}
+        try:
+            r = self.__do_execute(action, actual, expect)
+            ret["result"] = 0 if r[0] else 1
+            ret["expect"] = r[1]
+        except Exception, e:
+            ret["result"] = -1
+            ret["detail"] = e
+        self.__results.append(ret)
+
+        return ret
+
+    def __do_execute(self, action, actual, expect):
+        ret = False
+        if isfunction(actual):
+            actual = actual()
+
+        if "ok" == action:
+            action = "equal"
+            expect = True
+        elif "not_ok" == action:
+            action = "equal"
+            expect = False
+        elif "not_equal" == action:
+            action = "not_equal"
+
+        ret = self.__take_action(action, actual, expect)
+        return [ret, expect]
+
+    def __take_action(self, action, actual, expect):
+        if expect is None:
+            raise NoExpectException()
+
+        action = self.__actions[action]
+        return action(actual, expect)
