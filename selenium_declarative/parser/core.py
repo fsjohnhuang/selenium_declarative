@@ -72,11 +72,13 @@ class Parser:
         ret = apply(func, builtins + args)
         return ret
 
-    def parse_with_sub_context(self, exprs):
-        if exprs is None:
+    def parse_with_sub_context(self, exprs, stack=[]):
+        if exprs is None or len(exprs) == 0:
             return None
 
         self.context = Context(self.context)
+        for stack_frame in stack:
+            self.context.push(stack_frame)
         self.parse(exprs)
         ret = self.context.peek_locals()
         # recover
@@ -100,6 +102,9 @@ class Parser:
                 fn = self.__resolve(symbol)
                 if fn:
                     ret = self.__invoke(fn, args)
+                    # expand macro like function
+                    if isinstance(ret, list) and isinstance(ret[0], list):
+                        self.parse(ret)
                 else:
                     raise SyntaxError("Can't resolve symbol {0}.".format(symbol))
 

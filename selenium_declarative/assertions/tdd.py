@@ -5,7 +5,8 @@ from test_runner.expect import NoExpectException
 
 class TDD:
     __actions = {"equal": lambda a,e: a == e,
-                 "not_equal": lambda a,e: not a == e}
+                 "not_equal": lambda a,e: not a == e,
+                 "not_isinstance": lambda a,e: not isinstance(a, e)}
 
     def __init__(self):
         self.__results = []
@@ -38,6 +39,9 @@ class TDD:
         elif "not_ok" == action:
             action = "equal"
             expect = False
+        elif "not_raise" == action:
+            action = "not_isinstance"
+            expect = Exception
 
         ret = self.__take_action(action, actual, expect)
         return [ret, expect]
