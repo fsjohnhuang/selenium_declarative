@@ -41,3 +41,7 @@ def sf_catch(__peek__, __parser__, exception_type, *exprs):
 
 def sf_finally(__parser__, *exprs):
     __parser__.parse_with_sub_context(exprs)
+
+def sf_with(__parser__, enter_expr, *exprs):
+    ret = __parser__.parse_with_sub_context(enter_expr)
+    return ["try"] + exprs + [["finally" ["switch_default_content"]]]

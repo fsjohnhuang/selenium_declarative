@@ -102,3 +102,4 @@ ENV/
 
 selenium_declarative/maint*
 *.swp
+test/**
