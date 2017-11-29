@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from inspect import isfunction
-from test_runner.expect import NoExpectException
+from ..test_runner.expect import NoExpectException
 
 class TDD:
     __actions = {"equal": lambda a,e: a == e,

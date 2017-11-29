@@ -105,9 +105,10 @@ class Parser:
                     # expand macro like function
                     if isinstance(ret, list) and isinstance(ret[0], list):
                         self.parse(ret)
+                        ret = None
                 else:
                     raise SyntaxError("Can't resolve symbol {0}.".format(symbol))
 
             # if fn is an expression, stores the return value of it into stack
-            if not ret is None:
+            if ret is not None:
                 self.context.push(ret)
