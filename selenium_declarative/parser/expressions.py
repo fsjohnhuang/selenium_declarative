@@ -92,3 +92,9 @@ def expr_not_eqv(__parser__, __peek__, expr1, expr2=None):
     else:
         ret2 = __parser__.parse_with_sub_context(expr2)
     return re21 != ret2
+
+def expr_with(open_expr, *exprs):
+    if "switch_frame" != open_expr[0]:
+        raise SyntaxError("'with' expression receives 'switch-frame' only.")
+    try_finally = ["try", open_expr] + [expr for expr in exprs] + [["finally", ["switch_default_content"]]]
+    return [try_finally]
