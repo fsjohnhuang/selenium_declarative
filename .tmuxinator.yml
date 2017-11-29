@@ -3,7 +3,7 @@ root: ./
 
 windows:
   - editor: 
-      layout: main-horizontal
+      layout: 1763,164x45,0,0[164x36,0,0,3,164x8,0,37,4]
       panes: 
         - vim
         - python
