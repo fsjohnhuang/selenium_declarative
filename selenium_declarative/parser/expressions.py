@@ -53,14 +53,15 @@ def expr_wait(__parser__, __driver__, sec, *exprs):
 
 def expr_clickable(__peek__, slctr_type=None, slctr=None):
     if slctr_type is not None and slctr is not None:
-        return [["find_element", slctr_type, slctr], ["clickable"]]
+        return [["find_element_safe", slctr_type, slctr], ["clickable"]]
     else:
         el = __peek__()
+        is_clickable = False
         try:
-            a = el.is_displayed()
-            return a
+            is_clickable = el.is_displayed()
         except Exception, e:
-            raise False
+            is_clickable = False
+        return is_clickable
 
 def expr_switch_frame(__driver__, index=-1):
     count_frame = len(__driver__.find_elements("tag name", "iframe"))
@@ -98,3 +99,9 @@ def expr_with(open_expr, *exprs):
         raise SyntaxError("'with' expression receives 'switch-frame' only.")
     try_finally = ["try", open_expr] + [expr for expr in exprs] + [["finally", ["switch_default_content"]]]
     return [try_finally]
+
+def expr_tap(exprs):
+    if not isinstance(exprs[0], list):
+        exprs = [exprs]
+    code = exprs + [["display"]]
+    return code
