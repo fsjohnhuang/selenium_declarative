@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import time
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
 
 def expr_find_element(__driver__, slctr_type, slctr):
     return __driver__.find_element(slctr_type, slctr)
@@ -39,8 +40,16 @@ def expr_send_keys(__peek__, key):
     el = __peek__()
     el.send_keys(key)
 
-def expr_wait(sec):
-    time.sleep(sec)
+def expr_wait(__parser__, __driver__, sec, *exprs):
+    if len(exprs) == 0:
+        time.sleep(sec)
+    else:
+        class __Wait_Inner:
+            def __init__(self, exprs):
+                self.exprs = exprs
+            def __call__(self, driver):
+                return bool(__parser__.parse_with_sub_context(exprs))
+        WebDriverWait(__driver__, sec).until(__Wait_Inner(exprs))
 
 def expr_clickable(__peek__, slctr_type=None, slctr=None):
     if slctr_type is not None and slctr is not None:
@@ -63,11 +72,23 @@ def expr_switch_frame(__driver__, index=-1):
 def expr_switch_default_content(__driver__):
     __driver__.switch_to.default_content()
 
-def expr_count(__peek__):
-    els = __peek__()
-    return len(els)
+def expr_count(__peek__, slctr_type=None, slctr=None):
+    if slctr_type is not None and slctr is not None:
+        return [["find_element", slctr_type, slctr], ["count"]]
+    else:
+        els = __peek__()
+        return len(els)
 
 def expr_display(__peek__, anything=None):
     """write anything to stdout in human-readable format."""
     anything = anything if anything is not None else __peek__()
     print(anything)
+
+def expr_not_eqv(__parser__, __peek__, expr1, expr2=None):
+    ret1 = __parser__.parse_with_sub_context(expr1)
+    ret2 = None
+    if expr2 is None:
+        ret2 = __peek__()
+    else:
+        ret2 = __parser__.parse_with_sub_context(expr2)
+    return re21 != ret2

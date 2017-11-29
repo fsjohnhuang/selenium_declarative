@@ -30,7 +30,10 @@ def sf_try(__parser__, *exprs):
     try:
         __parser__.parse_with_sub_context(body_exprs)
     except Exception, e:
-        __parser__.parse_with_sub_context(catch_exprs, [e])
+        if len(catch_exprs) > 0:
+            __parser__.parse_with_sub_context(catch_exprs, [e])
+        else:
+            raise e
     finally:
         __parser__.parse_with_sub_context(finally_exprs)
 
@@ -41,9 +44,3 @@ def sf_catch(__peek__, __parser__, exception_type, *exprs):
 
 def sf_finally(__parser__, *exprs):
     __parser__.parse_with_sub_context(exprs)
-
-def sf_with(__parser__, enter_expr, *exprs):
-    """TODO
-    """
-    ret = __parser__.parse_with_sub_context(enter_expr)
-    return ["try"] + exprs + [["finally" ["switch_default_content"]]]

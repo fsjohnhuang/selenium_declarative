@@ -17,6 +17,9 @@ class Parser:
         in_str_token = False
         for i, c in enumerate(content):
             if "\n" == c:
+                if curr_token is not None:
+                    tokens.append(curr_token)
+                    curr_token = None
                 tokens.append([self.LF, c])
             else:
                 if in_str_token:
