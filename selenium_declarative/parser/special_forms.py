@@ -17,7 +17,7 @@ def sf_try(__parser__, *exprs):
     finally_exprs = []
 
     for expr in exprs:
-        if expr[0] == "catch":
+        if expr[0] in ["catch", "catch_all"]:
             catch_exprs.append(expr)
         elif expr[0] == "finally":
             finally_exprs.append(expr)
@@ -41,6 +41,9 @@ def sf_catch(__peek__, __parser__, exception_type, *exprs):
     e = __peek__()
     if isinstance(e, exception_type):
         __parser__.parse_with_sub_context(exprs)
+
+def sf_catch_all(__peek__, __parser__, *exprs):
+    __parser__.parse_with_sub_context(exprs)
 
 def sf_finally(__parser__, *exprs):
     __parser__.parse_with_sub_context(exprs)
