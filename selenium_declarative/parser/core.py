@@ -40,10 +40,16 @@ class Parser:
         self.driver = driver
         self.sfs = reflect_builtins(special_forms)         # special forms
         self.fns = reflect_builtins(expressions)           # global functions
+        self.fns.setdefault(">", lambda __parser__,a,b: __parser__.parse_with_sub_context(a) > __parser__.parse_with_sub_context(b))
+        self.fns.setdefault(">=", lambda __parser__,a,b: __parser__.parse_with_sub_context(a) >= __parser__.parse_with_sub_context(b))
+        self.fns.setdefault("<", lambda __parser__,a,b: __parser__.parse_with_sub_context(a) < __parser__.parse_with_sub_context(b))
+        self.fns.setdefault("<=", lambda __parser__,a,b: __parser__.parse_with_sub_context(a) <= __parser__.parse_with_sub_context(b))
+        self.fns.setdefault("=", lambda __parser__,a,b: __parser__.parse_with_sub_context(a) == __parser__.parse_with_sub_context(b))
+        self.fns.setdefault("!=", lambda __parser__,a,b: __parser__.parse_with_sub_context(a) != __parser__.parse_with_sub_context(b))
         if isinstance(fns, dict):
             for kv in fns.items():
                 self.fns.setdefault(kv[0], kv[1])
-        self.globals = {}                                  # global variables
+        self.globals = {"wait_until_sec": 30}                                  # global variables
         self.context = Context()
 
     def __resolve(self, symbol):
@@ -73,7 +79,9 @@ class Parser:
         return ret
 
     def parse_with_sub_context(self, exprs, stack=[]):
-        if exprs is None or len(exprs) == 0:
+        if not isinstance(exprs, list) and not isinstance(exprs, tuple):
+            return exprs
+        if len(exprs) == 0:
             return None
 
         self.context = Context(self.context)

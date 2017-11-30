@@ -11,6 +11,18 @@ def sf_not(__parser__, exprs):
     ret = not __parser__.parse_with_sub_context(exprs)
     return ret
 
+def sf_and(__parser__, *exprs):
+    ret = True
+    for expr in exprs:
+        ret = ret and __parser__.parse_with_sub_context(expr)
+    return ret
+
+def sf_or(__parser__, *exprs):
+    ret = False
+    for expr in exprs:
+        ret = ret or __parser__.parse_with_sub_context(expr)
+    return ret
+
 def sf_try(__parser__, *exprs):
     body_exprs = []
     catch_exprs = []

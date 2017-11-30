@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
+import os, json
 from ..parser.core import Parser
 from ..assertions.tdd import TDD
 from ..scm_parser.core import Parser as SCMParser
@@ -32,7 +32,9 @@ class TestRunner:
                 expect = e
 
             ret = tdd.execute(action, actual, expect, msg)
-            print(ret)
+            for kvs in ret.items():
+                print " {0}:{1} ".format(*kvs),
+            print ""
         return ss
 
     def __init__(self, driver, url, test_path, expect_path):
@@ -81,7 +83,8 @@ class TestRunner:
     def get_testcases(self, paths):
         code = []
         for d in paths:
-            code = code + self.get_testcase(d)
+            if d.endswith("testsuit3"):
+                code = code + self.get_testcase(d)
 
         return code
 

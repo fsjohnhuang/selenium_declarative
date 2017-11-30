@@ -68,7 +68,7 @@ class Parser:
                             curr_token[1].append(c)
                         else:
                             curr_token = [self.Num, [c]]
-                    elif re.match("[a-zA-Z-_]", c):
+                    elif re.match("[a-zA-Z-_>=<!+%]", c):
                         if curr_token is not None:
                             if curr_token[0] != self.Symbol:
                                 raise SyntaxError()
